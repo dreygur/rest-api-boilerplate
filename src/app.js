@@ -7,6 +7,9 @@ import morgan from 'morgan';
 import actuator from 'express-actuator';
 import { readFileSync } from 'fs';
 
+// Test
+import { services } from './services';
+
 // Settings
 import settings from '../config/settings.json';
 
@@ -28,6 +31,8 @@ export default class App {
 
     // Server
     this.server = http2.createServer(options, this.express);
+
+    return this;
   }
 
   init() {
@@ -39,9 +44,17 @@ export default class App {
     this.express.use(urlencoded({ extended: false })); // Legacy URL encoding
     this.express.use(cookieParser()); // Parse cookies
     this.express.use(parse()); // Parse Form data as JSON
+
+    services(this);
   }
 
   listen() {
-    this.server.listen()
+    return new Promise((resolve) => {
+      this.server.listen(this.config.port, () => resolve(`=> Listening on ${this.config.port}`));
+    });
+  }
+
+  configure(callback) {
+    callback.call(this);
   }
 }
