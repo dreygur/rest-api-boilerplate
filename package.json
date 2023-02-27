@@ -1,0 +1,43 @@
+{
+  "name": "rest-api-boilerplate",
+  "version": "1.0.0",
+  "description": "A framework like boilerplate on top of express.js, socketio, mongodb",
+  "main": "dist/index.js",
+  "repository": "git@rakib:dreygur/rest-api-boilerplate.git",
+  "author": "Rakibul Yeasin <ryeasin03@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "babel src -d dist && node-git-info",
+    "start": "yarn build && nodemon dist/index.js",
+    "dev": "env-cmd -f config/dev.env nodemon --exec babel-node src/index.js",
+    "lint": "eslint src --ext js"
+  },
+  "dependencies": {
+    "@lyrasearch/lyra": "^0.4.9",
+    "@lyrasearch/plugin-data-persistence": "^0.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-actuator": "^1.8.4",
+    "express-form-data": "^2.0.19",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.8.4",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.6.1",
+    "spdy": "^4.0.2",
+    "web-push": "^3.5.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/node": "^7.20.7",
+    "@babel/plugin-transform-runtime": "^7.19.6",
+    "@babel/preset-env": "^7.20.2",
+    "env-cmd": "^10.1.0",
+    "eslint": "^8.32.0",
+    "node-git-info": "^1.1.0",
+    "nodemon": "^2.0.20"
+  }
+}
