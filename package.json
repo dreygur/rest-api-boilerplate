@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A framework like boilerplate on top of express.js, socketio, mongodb",
   "main": "dist/index.js",
-  "repository": "git@rakib:dreygur/rest-api-boilerplate.git",
+  "repository": "git@github.com:dreygur/rest-api-boilerplate.git",
   "author": "Rakibul Yeasin <ryeasin03@gmail.com>",
   "license": "MIT",
   "private": true,
