@@ -1,9 +1,5 @@
-function test() {
-  console.log(this);
-  console.log('args');
-
-}
+import user from './user/user';
 
 export const services = (app) => {
-  app.configure(test);
+  app.configure(user);
 };

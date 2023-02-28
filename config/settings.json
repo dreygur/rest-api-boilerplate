@@ -1,3 +1,5 @@
 {
-  "port": 4000
+  "port": 4000,
+  "origin": "*",
+  "useHTTP2": false
 }
