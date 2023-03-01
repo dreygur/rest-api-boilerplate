@@ -1,5 +1,5 @@
-import user from './user/user';
+import demo from "./demo/demo";
 
 export const services = (app) => {
-  app.configure(user);
+  app.configure(demo);
 };
