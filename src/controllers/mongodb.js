@@ -1,5 +1,8 @@
 import { connect, set } from 'mongoose';
 
+// Settings
+import settings from '../../../config/settings.json';
+
 export default function () {
   return new Promise(function (resolve, reject) {
     // Set mongoose properties
@@ -7,7 +10,7 @@ export default function () {
 
     // Connect
     // eslint-disable-next-line
-    connect(process.env.MONGODB_URL, {
+    connect(settings.mongodb, {
       keepAlive: true,
       loggerLevel: 'debug'
     }, function (err) {
