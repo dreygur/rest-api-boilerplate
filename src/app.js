@@ -9,10 +9,10 @@ import actuator from 'express-actuator';
 import { readFileSync } from 'fs';
 
 // Local Services
-import socket from './socket';
 import { services } from './services';
-import SearchCtrl from './search';
-import * as operations from './operations';
+import socket, { listen as wsListen } from './controllers/socket';
+import SearchCtrl from './controllers/search/search';
+import * as operations from './controllers/operations';
 
 // Settings
 import settings from '../config/settings.json';
@@ -23,7 +23,9 @@ export default class App {
     this.config = settings;
     this.search = new SearchCtrl();
     this.db = operations;
+    this.events = {};
 
+    // Boot Up the server & services
     this.init();
   }
 
@@ -57,10 +59,12 @@ export default class App {
     // Start Search service
     this.search.start();
     // Sokcet Server
-    this.socket = socket(this.server, { origin: this.config.origin });
-
+    this.socket = socket(this.server, this.events, { origin: this.config.origin });
     // Load the Services
     services(this);
+
+    // Listen for events
+    wsListen(this.socket, this.events);
   }
 
   listen() {
@@ -68,8 +72,15 @@ export default class App {
       console.log(`=> Listening on ${this.config.port}`);
     });
   }
-
+  // configure service with api
   configure(callback) {
-    callback.call({ ...this.express, ws: this.socket, search: this.search, db: this.db });
+    callback.call({ ...this.express, ws: this.socket, lyra: this.search, db: this.db });
+  }
+  // register events for ws with service
+  register(event, callback) {
+    this.events[event] = {
+      method: callback,
+      props: { ws: this.socket, lyra: this.search, db: this.db }
+    };
   }
 }

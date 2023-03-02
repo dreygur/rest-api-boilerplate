@@ -59,7 +59,6 @@ const find = ({ table, key = {} }) => new Promise((resolve, reject) => {
   delete key.paginate;
   delete key.options;
   delete key?.query;
-
   // May break
   resolve(table[method](key, options)[noPaginate ? 'populate' : 'then'](populate?.path, populate?.select?.split(' ')))
     .then(res => resolve(res))

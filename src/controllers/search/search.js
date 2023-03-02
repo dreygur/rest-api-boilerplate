@@ -2,6 +2,7 @@ import { create as lcreate, insert as linsert, remove as lremove, search as lsea
 import { persistToFile, restoreFromFile } from '@lyrasearch/plugin-data-persistence';
 import path from 'path';
 import fs from 'fs';
+import { schemas } from './schemas';
 
 const eventsToHandle = [];
 
@@ -25,14 +26,7 @@ export default class SearchCtrl {
      * The schemas for the Lyra instances.
      * @type {Object}
     */
-    this.schemas = {
-      user: {
-        fullName: 'string',
-        email: 'string',
-        phone: 'string',
-        id: 'string'
-      }
-    };
+    this.schemas = schemas;
   }
 
   /**

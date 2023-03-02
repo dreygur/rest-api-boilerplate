@@ -1,0 +1,1 @@
+export const demoMid = (req, res, next) => next();
