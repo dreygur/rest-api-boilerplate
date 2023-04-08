@@ -1,6 +1,0 @@
-{
-  "port": 4000,
-  "origin": "*",
-  "useHTTP2": false,
-  "mongodb": "mongodb+srv://jayeen28:Jayeen6783@cluster0.hwr4rv6.mongodb.net/banger?retryWrites=true&w=majority"
-}

@@ -1,0 +1,8 @@
+{
+  "port": 9998,
+  "origin": [
+    "https://projects.coredevs.ltd",
+    "http://projects.coredevs.ltd"
+  ],
+  "useHTTP2": true
+}

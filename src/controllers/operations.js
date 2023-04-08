@@ -167,9 +167,9 @@ const remove = async ({ table, key }) => {
  * @return {Promise} A promise that resolves with an object containing information about the deleted elements.
  *   Rejects with an error if there was an issue deleting the elements.
  */
-const removeAll = async ({ table }) => {
+const removeAll = async ({ table, key }) => {
   try {
-    const res = await table.deleteMany({});
+    const res = await table.deleteMany(key);
     return Promise.resolve(res);
   }
   catch (e) { Promise.reject(e); }
