@@ -17,6 +17,7 @@ import { hooks } from './hooks';
 import { services } from './services';
 import socket, { listen as wsListen } from './controllers/socket';
 import SearchCtrl from './controllers/search/search';
+import NewMailer from './controllers/email';
 import * as operations from './controllers/operations';
 
 // Settings
@@ -29,10 +30,11 @@ export default class App {
     this.router = new Router();
     this.config = settings;
     this.search = new SearchCtrl();
+    this.mail = NewMailer(this.config);
     this.imageUp = imageUp;
     this.db = operations;
     this.events = {};
-
+    this.wsMiddlewares = [];
 
     // Boot Up the server & services
     this.init();
@@ -79,16 +81,6 @@ export default class App {
 
       // Load the Hooks
       hooks(this);
-      /*
-      // Peer Server
-      this.peer = ExpressPeerServer(this.server, {
-        ssl: this.ssl,
-        debug: true,
-        path: '/',
-        proxied: true,
-      });
-      this.express.use('/peerserver', this.peer);
-      */
     } else {
       this.server = http.createServer(this.express);
     }
@@ -101,7 +93,7 @@ export default class App {
     services(this);
 
     // Listen for events
-    wsListen(this.socket, this.events);
+    wsListen(this.socket, this.events, ...this.wsMiddlewares);
   }
 
   listen() {
@@ -123,13 +115,36 @@ export default class App {
 
   // configure service with api
   configure(callback) {
-    callback.call({ ...this.express, route: this.router, ws: this.socket, imageUp: this.imageUp, lyra: this.search, db: this.db });
+    callback.call({
+      ...this.express,
+      route: this.router,
+      ws: this.socket,
+      imageUp: this.imageUp,
+      lyra: this.search,
+      db: this.db,
+      mail: this.mail,
+      settings: this.config
+    });
   }
+
   // register events for ws with service
-  register(event, callback) {
+  register(event, middlewares, callback) {
+    let callee;
+    if (typeof middlewares === 'function') {
+      callee = middlewares;
+    } else {
+      callee = callback;
+      this.wsMiddlewares = middlewares;
+    }
     this.events[event] = {
-      method: callback,
-      props: { ws: this.socket, lyra: this.search, db: this.db }
+      method: callee,
+      props: {
+        ws: this.socket,
+        lyra: this.search,
+        db: this.db,
+        mail: this.mail,
+        settings: this.config
+      }
     };
   }
 }

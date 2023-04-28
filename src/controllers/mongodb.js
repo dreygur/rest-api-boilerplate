@@ -1,13 +1,13 @@
 import { connect, set } from 'mongoose';
 
-export default function () {
+export default function (settings) {
   return new Promise(function (resolve, reject) {
     // Set mongoose properties
     set('strictQuery', true);
 
     // Connect
     // eslint-disable-next-line
-    connect(process.env.MONGODB_URL, {
+    connect(settings.MONGODB_URL, {
       keepAlive: true,
       loggerLevel: 'debug'
     }, function (err) {

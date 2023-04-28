@@ -1,5 +1,5 @@
-import { create as lcreate, insert as linsert, remove as lremove, search as lsearch } from '@lyrasearch/lyra';
-import { persistToFile, restoreFromFile } from '@lyrasearch/plugin-data-persistence';
+import { create as lcreate, insert as linsert, remove as lremove, search as lsearch } from '@orama/orama';
+import { persistToFile, restoreFromFile } from '@orama/plugin-data-persistence';
 import path from 'path';
 import fs from 'fs';
 import { schemas } from './schemas';

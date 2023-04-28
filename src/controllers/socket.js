@@ -1,28 +1,4 @@
 import { Server } from 'socket.io';
-import decodeAuthToken from '../utils/decodeAuthToken';
-
-/**
- * This middleware is used for authorize the socketid if the connection comes with a authoriation token.
- * NOTE: It only works after login there is a function called 'authenticateEvents' to authenticate the token after login.
- * @param {Object} socket The socket object.
- * @param {Function} next Function to move forward
- */
-async function socketAuth(socket, next) {
-  try {
-    const token = (socket.handshake?.headers?.cookie || '')?.split(';')?.find(s => s.includes('token='))?.split("=")[1] || (process.env.NODE_ENV === 'development' ? socket.handshake.headers['authorization']?.replace('Bearer ', '') : null);
-    if (!token) throw new Error('Invalid token.');
-    const user = await decodeAuthToken(token);
-    if (!user) throw new Error('User not found with the provided token.');
-    socket.token = token;
-    socket.user = user;
-    socket.join(user.id);
-    next();
-  }
-  catch (e) {
-    next(new Error('unauthorized'));
-    // console.log(e);
-  }
-}
 
 /**
  * Initializes a Socket.IO server with the provided HTTP server instance,
@@ -61,16 +37,24 @@ export default function start(server, options) {
  *   functions and properties. The properties include any additional
  *   metadata that the handler functions might need to process the event.
  */
-export function listen(io, events) {
-  io.use(socketAuth);
-  io.on('connection', async ws => {
-    console.log('Connected =>', ws.id);
-    ws.on('disconnect', () => console.log('Diconnected =>', ws.id));
+export function listen(io, events, ...middlewares) {
+  (new Promise((resolve) => {
+    for (let i in middlewares) {
+      io.use(i);
+    }
 
-    ws.onAny((event, ...args) => {
-      events[event]?.method({ data: args[0], session: ws, ...events[event]?.props });
+    resolve();
+  })).then(() => {
+    io.on('connection', async ws => {
+      console.log('Connected =>', ws.id);
+      ws.on('disconnect', () => console.log('Diconnected =>', ws.id));
+
+      ws.onAny((event, ...args) => {
+        events[event]?.method({ data: args[0], session: ws, ...events[event]?.props });
+      });
     });
-  });
 
-  console.log('=> Registered all event handlers');
+    console.log('=> Registered all event handlers');
+  })
+    .catch(e => console.log(`[-] ${e.message}`));
 }
