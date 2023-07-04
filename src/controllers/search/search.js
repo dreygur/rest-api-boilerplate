@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { schemas } from './schemas';
 
-const eventsToHandle = [];
+// const eventsToHandle = ['SIGTERM', 'SIGINT', 'unhandledRejection', 'uncaughtException', 'SIGUSR2'];
 
 /**
  * SearchCtrl is a class that encapsulates methods for starting and controlling Lyra search instances,
@@ -21,7 +21,7 @@ export default class SearchCtrl {
      * The data path where the instances will be persisted.
      * @type {string}
     */
-    this.dataPath = path.resolve() + '/search/';
+    this.dataPath = path.join(path.resolve(), '.cache');
     /**
      * The schemas for the Lyra instances.
      * @type {Object}
@@ -48,7 +48,7 @@ export default class SearchCtrl {
    * @returns {Promise<Array>} - A Promise that resolves to an array of the results of saving each instance to disk
   */
   save(keys = Object.keys(this.schemas)) {
-    return Promise.all(keys.map((k, i) => persistToFile(this.instances[k], 'binary', `${this.dataPath + keys[i]}.msp`)));
+    return Promise.all(keys.map((k, i) => persistToFile(this.instances[k], 'binary', `${path.join(this.dataPath, keys[i] + '.msp')}`)));
   }
 
   /**
@@ -58,19 +58,13 @@ export default class SearchCtrl {
    * 2. The `instances` object is populated by creating or restoring instances for each key
    * 3. The `save` method is called to save the instances to disk
    * 4. Event handlers for `eventsToHandle` are added to the process, which will save the instances and exit the process upon encountering the specified events
-   *
-   * @async
   */
   async start() {
-    if (!fs.existsSync(this.dataPath)) fs.mkdirSync(this.dataPath);
+    if (!fs.existsSync(this.dataPath)) fs.mkdirSync(this.dataPath, { recursive: true });
     const keys = Object.keys(this.schemas);
-    await Promise.all(keys.map(async k => (this.instances[k] = (await this.restore(`${this.dataPath + k}.msp`) || await lcreate({ schema: this.schemas[k] })))));
+    await Promise.all(keys.map(async k => (this.instances[k] = (await this.restore(`${path.join(this.dataPath, k + '.msp')}`) || await lcreate({ schema: this.schemas[k] })))));
     await this.save(keys);
-    eventsToHandle.forEach(async e => process.on(e, async orgErr => {
-      console.log(orgErr);
-      await this.save();
-      return process.exit();
-    }));
+
     console.log('=> Search controller started');
   }
 

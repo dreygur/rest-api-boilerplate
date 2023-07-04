@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { driversCache } from './driverCache';
+import { driverCache } from './driverCache';
 const eventsToHandle = ['SIGTERM', 'SIGINT', 'unhandledRejection', 'uncaughtException', 'SIGUSR2'];
 
-const cachePath = path.join(path.resolve(), 'cache');
+const cachePath = path.join(path.resolve(), '.cache');
 if (!fs.existsSync(cachePath)) fs.mkdirSync(cachePath);
 
 export default function gracefullShutdown() {
@@ -12,7 +12,7 @@ export default function gracefullShutdown() {
     try {
       console.log(orgErr);
       await this.search.save().catch(e => console.log(e));
-      driversCache.die();
+      driverCache.die();
       return process.exit();
     }
     catch (e) {

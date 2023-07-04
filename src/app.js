@@ -26,7 +26,7 @@ import settings from '../settings.json';
 // Controllers
 import { imageUp } from './controllers/imageUp';
 import gracefullShutdown from './controllers/gracefullShutdown';
-import { driverCache } from './controllers/driversCache';
+import { driverCache } from './controllers/driverCache';
 
 export default class App {
   constructor({ deps } = {}) {
