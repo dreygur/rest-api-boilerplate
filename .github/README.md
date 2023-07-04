@@ -14,6 +14,7 @@ This booilerplate handles static file serving for SPA and also does the api serv
 - Mongoose ORM
 - Mailer using nodemailer
 - Basic database operations pebuilt, so one just have to write schema and nothing more
+- Disc caching
 - Written in ES6 so newcomers or frontend developers don't have to worry about node.js native api's
 - Pre-integrated linter using eslint so the code is always abide by the standards
 
