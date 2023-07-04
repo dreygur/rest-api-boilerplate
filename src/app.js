@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser';
 import form from 'express-form-data';
 import express from 'express';
 import { Router } from 'express';
-// import http2 from 'spdy';
 import http2 from 'https';
 import http from 'http';
 import path from 'path';
@@ -11,6 +10,7 @@ import morgan from 'morgan';
 import actuator from 'express-actuator';
 import { readFileSync } from 'fs';
 import cors from 'cors';
+// import http2 from 'spdy';
 
 // Local Services
 import { hooks } from './hooks';
@@ -22,10 +22,14 @@ import * as operations from './controllers/operations';
 
 // Settings
 import settings from '../settings.json';
+
+// Controllers
 import { imageUp } from './controllers/imageUp';
+import gracefullShutdown from './controllers/gracefullShutdown';
+import { driverCache } from './controllers/driversCache';
 
 export default class App {
-  constructor() {
+  constructor({ deps } = {}) {
     this.express = express();
     this.router = new Router();
     this.config = settings;
@@ -36,15 +40,23 @@ export default class App {
     this.events = {};
     this.wsMiddlewares = [];
 
-    // Boot Up the server & services
-    this.init();
+    if (deps) {
+      let promises = deps.map(({ method, args }) => new Promise((resolve, reject) => method(...args).then(r => resolve(r)).catch((err) => reject(err))));
+      Promise.all(promises).then((res) => console.log(`=> ${res}!`)).then(() => this.init()).catch((err) => console.log(err));
+    }
   }
 
   start() {
-    this.listen();
+    const readyStatus = setInterval(() => {
+      if (this.ready) {
+        this.listen();
+        clearInterval(readyStatus);
+      }
+    }, 300);
   }
 
   init() {
+    driverCache.born();
     const { parse } = form;
 
     this.express.enable('trust proxy');
@@ -61,8 +73,8 @@ export default class App {
     this.express.use(urlencoded({ extended: false })); // Legacy URL encoding
     this.express.use(cookieParser()); // Parse cookies
     this.express.use(parse()); // Parse Form data as JSON
-    this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
     this.express.use('/api', this.router); // All the API routes
+    this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
 
     if (this.config.useHTTP2) {
       // SSL configuration
@@ -94,6 +106,9 @@ export default class App {
 
     // Listen for events
     wsListen(this.socket, this.events, ...this.wsMiddlewares);
+
+    this.ready = true;
+    gracefullShutdown.call({ ...this });
   }
 
   listen() {

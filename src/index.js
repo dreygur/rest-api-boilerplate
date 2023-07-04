@@ -3,6 +3,7 @@ import path from 'path';
 import conncetMongoDB from './controllers/mongodb';
 import App from './app';
 import settings from '../settings.json';
+import './utils/dateOverride';
 
 (() => {
   // Check for clients directory as it is required by this framework
@@ -11,14 +12,12 @@ import settings from '../settings.json';
     fs.mkdirSync(statics);
   }
 
-  // Connect to MongoDB
-  conncetMongoDB(settings)
-    .then(function (res) {
-      console.log(`=> ${res}!`);
+  const deps = [{
+    method: conncetMongoDB,
+    args: [settings]
+  }];
 
-      // Boot Up the server & services
-      const app = new App();
-      app.start();
-    })
-    .catch(err => console.log(err));
+  // Boot Up the server & services
+  const app = new App({ deps });
+  app.start();
 })();

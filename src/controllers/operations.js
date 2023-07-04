@@ -29,9 +29,9 @@
 const find = ({ table, key = {} }) => new Promise((resolve, reject) => {
   const queryKeys = Object.keys(key?.query || {});
   const verified = queryKeys.every(k => (key.allowedQuery || new Set([])).has(k));
-  if (!verified) reject('Query validation issue');
+  if (!verified) return reject('Query validation issue');
   const noPaginate = key.paginate === false;
-  key.options = noPaginate ? {} : {
+  key.options = noPaginate ? { sort: {} } : {
     ...key.populate && { populate: { ...key.populate } },
     page: key?.query?.page || 0,
     limit: key?.query?.limit || 10,
@@ -39,7 +39,7 @@ const find = ({ table, key = {} }) => new Promise((resolve, reject) => {
   };
   // prepare query object with provied queries to find.
   queryKeys.forEach(async k => {
-    if (typeof key?.query[k] === 'string' && key?.query[k].startsWith('{"') && key?.query[k].endsWith('"}')) key.query[k] = JSON.parse(key?.query[k]);
+    if (typeof key?.query[k] === 'string' && key?.query[k].startsWith('{"') && key?.query[k].endsWith('}')) key.query[k] = JSON.parse(key?.query[k]);
     if (k === 'sortBy') {
       const parts = key?.query?.sortBy.split(':');
       return key.options.sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
@@ -59,8 +59,9 @@ const find = ({ table, key = {} }) => new Promise((resolve, reject) => {
   delete key.paginate;
   delete key.options;
   delete key?.query;
+  const args = [key, ...noPaginate ? [null] : [], options];
   // May break
-  resolve(table[method](key, options)[noPaginate ? 'populate' : 'then'](populate?.path, populate?.select?.split(' ')))
+  resolve(table[method](...args)[noPaginate ? 'populate' : 'then'](populate))
     .then(res => resolve(res))
     .catch(e => reject(e));
 });
@@ -101,10 +102,10 @@ const create = async ({ table, key }) => {
   try {
     const elem = await new table(key);
     const res = await elem.save();
-    key.populate && await res.populate(key.populate?.path, key.populate?.select?.split(' '));
-    return Promise.resolve(res);
+    key.populate && await res.populate(key.populate);
+    return res;
   } catch (e) {
-    return Promise.reject(e);
+    console.log(e);
   }
 };
 
@@ -130,7 +131,7 @@ const update = async ({ table, key }) => {
     if (key.id) key._id = key.id; delete key.id;
     const element = await table.findOne(key);
     if (!element) return Promise.resolve(element);
-    Object.keys(key.body).forEach(param => element[param] = key.body[param]);
+    Object.keys(key.body || {}).forEach(param => element[param] = key.body[param]);
     const res = await element.save();
     key.populate && await res.populate(key.populate?.path, key.populate?.select?.split(' '));
     return Promise.resolve(element);
@@ -148,8 +149,13 @@ const update = async ({ table, key }) => {
  * @return {Promise} A promise that resolves with the removed element if it was found and removed successfully,
  *   or with `null` if no element was found. Rejects with an error if there was an issue removing the element.
  */
-const remove = async ({ table, key }) => {
+const remove = async (target) => {
+  const { table, key, _id } = target;
   try {
+    if (_id) {//if mongodb instance found then delete with obj.remove method.
+      await target.remove();
+      return Promise.resolve(target);
+    }
     if (key.id) key._id = key.id; delete key.id;
     const element = await table.findOne(key);
     if (!element) return Promise.resolve(element);
@@ -175,13 +181,38 @@ const removeAll = async ({ table, key }) => {
   catch (e) { Promise.reject(e); }
 };
 
+
+const updateMany = async ({ table, key }) => {
+  try {
+    const { filter, update, options, callback } = key;
+    const res = await table.updateMany(filter, update, options, callback);
+    return Promise.resolve(res);
+  }
+  catch (err) { Promise.reject(err); }
+};
+
 /**
  * save - Saves an element to the database.
  *
  * @param {Object} data - The element to save.
- * @return {Promise} A promise that resolves with the saved element if it was saved successfully.
+ * @return {Promise}approved A promise that resolves with the saved element if it was saved successfully.
  *   Rejects with an error if there was an issue saving the element.
  */
 const save = async (data) => await data.save();
 
-export { find, findOne, create, remove, update, save, removeAll };
+/**
+ * Asynchronously populates the specified field(s) of a Mongoose model instance with documents from other collections.
+ *
+ * @param {Model} data - The Mongoose model instance to populate.
+ * @param {Object|String} payload - An object or string specifying the field(s) to populate and any additional options.
+ * @returns {Promise<Model>} A Promise that resolves to the populated model instance.
+ * @throws {Error} If data is not a valid Mongoose model instance or if payload is not a valid object or string.
+ * @throws {Error} If an error occurs while populating the model instance.
+ */
+const populate = async (data, payload = {}) => await data.populate(payload);
+
+const sort = async (data, payload = {}) => await data.sort(payload);
+
+const aggr = async ({ table, key }) => await table.aggregate(key);
+
+export { find, findOne, create, remove, update, save, removeAll, populate, sort, aggr, updateMany };
