@@ -1,5 +1,5 @@
 {
-  "port": 5000,
+  "port": 4000,
   "origin": [],
   "useHTTP2": true,
   "SMTP_HOST": "",
@@ -8,5 +8,5 @@
   "SMTP_PASSWORD": "",
   "EMAIL_NAME": "",
   "EMAIL_FROM": "from@example.com",
-  "MONGODB_URL": "mongodb+srv://david:davidcoredevs@cluster0.pun5ruw.mongodb.net/builderTrend"
+  "MONGODB_URL": ""
 }

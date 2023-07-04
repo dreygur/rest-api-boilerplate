@@ -10,6 +10,7 @@ import morgan from 'morgan';
 import actuator from 'express-actuator';
 import { readFileSync } from 'fs';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 // import http2 from 'spdy';
 
 // Local Services
@@ -61,6 +62,14 @@ export default class App {
 
     this.express.enable('trust proxy');
 
+    // Rate Limiter
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+      standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+      legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    });
+
     // Load the middlewwares
     this.express.use(
       cors({
@@ -73,7 +82,7 @@ export default class App {
     this.express.use(urlencoded({ extended: false })); // Legacy URL encoding
     this.express.use(cookieParser()); // Parse cookies
     this.express.use(parse()); // Parse Form data as JSON
-    this.express.use('/api', this.router); // All the API routes
+    this.express.use('/api', limiter, this.router); // All the API routes
     this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
 
     if (this.config.useHTTP2) {
