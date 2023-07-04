@@ -97,6 +97,13 @@ server {
     proxy_pass ${target};
 	}
 
+  location /api {
+    limit_req zone=mylimit burst=20 nodelay;
+    limit_req_status 444;
+
+    proxy_pass ${target}/api;
+	}
+
 	location /peerserver/peerjs {
   proxy_pass ${target};
   proxy_http_version 1.1;
