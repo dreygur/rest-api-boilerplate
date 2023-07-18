@@ -24,7 +24,7 @@
     "express-form-data": "^2.0.19",
     "express-rate-limit": "^6.7.0",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.8.4",
+    "mongoose": "^6.11.3",
     "mongoose-paginate-v2": "^1.7.1",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.1",
