@@ -31,7 +31,8 @@
     "peer": "^1.0.0",
     "socket.io": "^4.6.1",
     "spdy": "^4.0.2",
-    "web-push": "^3.5.0"
+    "web-push": "^3.5.0",
+    "moment": ">=2.29.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
