@@ -1,4 +1,4 @@
-const settings = {
+export default {
   'port': process.env.PORT || 4000,
   'origin': [
     '*'
@@ -12,5 +12,3 @@ const settings = {
   'EMAIL_FROM': 'from@example.com',
   'MONGODB_URL': ''
 };
-
-export default settings;
