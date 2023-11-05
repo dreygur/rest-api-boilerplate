@@ -1,4 +1,5 @@
 
+// addDays Method
 Date.prototype.addDays = function (days) {
   let date = new Date(this.toDateString());
   date.setDate(this.getDate() + days);

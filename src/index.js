@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+import './overloads';
+import fs from 'node:fs';
+import path from 'node:path';
 import conncetMongoDB from './controllers/mongodb';
 import App from './app';
 import settings from './settings';
-import './utils/dateOverride';
 
 (() => {
   // Check for clients directory as it is required by this framework
-  const statics = path.resolve(__dirname, '..', 'client');
+  const statics = path.resolve(process.cwd(), '..', 'client');
   if (!fs.existsSync(statics)) {
     fs.mkdirSync(statics);
   }
@@ -20,6 +20,6 @@ import './utils/dateOverride';
   }];
 
   // Boot Up the server & services
-  const app = new App({ deps: [] });
+  const app = new App({ deps });
   app.start();
 })();

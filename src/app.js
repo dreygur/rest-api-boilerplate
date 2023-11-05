@@ -1,14 +1,13 @@
+import http from 'node:http';
+import path from 'node:path';
+import http2 from 'node:https';
+import { readFileSync } from 'node:fs';
 import { json, urlencoded } from 'express';
 import cookieParser from 'cookie-parser';
 import form from 'express-form-data';
-import express from 'express';
-import { Router } from 'express';
-import http2 from 'https';
-import http from 'http';
-import path from 'path';
+import express, { Router } from 'express';
 import morgan from 'morgan';
 import actuator from 'express-actuator';
-import { readFileSync } from 'fs';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 // import http2 from 'spdy';
@@ -87,7 +86,7 @@ export default class App {
     this.express.use(cookieParser()); // Parse cookies
     this.express.use(parse()); // Parse Form data as JSON
     this.express.use('/api', limiter, this.router); // All the API routes
-    this.express.use(express.static(path.resolve(__dirname, '..', 'client'))); // REACT build files (Statics)
+    this.express.use(express.static(path.resolve(process.cwd(), '..', 'client'))); // REACT build files (Statics)
 
     if (this.config.useHTTP2) {
       // SSL configuration
@@ -130,7 +129,7 @@ export default class App {
   listen() {
     // Serve Front-end
     this.express.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, '..', 'client', 'index.html'));
+      res.sendFile(path.resolve(process.cwd(), '..', 'client', 'index.html'));
     });
 
     // Boot the server
