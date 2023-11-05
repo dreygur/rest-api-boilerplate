@@ -78,7 +78,6 @@ server {
 	return 301 https://${domain}$request_uri;
 }
 
-
 server {
   listen 443 ssl;
 	listen [::]:443 ssl;
@@ -98,9 +97,6 @@ server {
 	}
 
   location /api {
-    limit_req zone=mylimit burst=20 nodelay;
-    limit_req_status 444;
-
     proxy_pass ${target}/api;
 	}
 
