@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import conncetMongoDB from './controllers/mongodb';
 import App from './app';
-import settings from '../settings.json';
+import settings from './settings';
 import './utils/dateOverride';
 
 (() => {
@@ -12,12 +12,14 @@ import './utils/dateOverride';
     fs.mkdirSync(statics);
   }
 
+  // Dependencies that requires load
+  // before express app
   const deps = [{
     method: conncetMongoDB,
     args: [settings]
   }];
 
   // Boot Up the server & services
-  const app = new App({ deps });
+  const app = new App({ deps: [] });
   app.start();
 })();

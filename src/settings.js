@@ -1,0 +1,16 @@
+const settings = {
+  'port': process.env.PORT || 4000,
+  'origin': [
+    '*'
+  ],
+  'useHTTP2': true,
+  'SMTP_HOST': '',
+  'SMTP_PORT': '',
+  'SMTP_USER': '',
+  'SMTP_PASSWORD': '',
+  'EMAIL_NAME': '',
+  'EMAIL_FROM': 'from@example.com',
+  'MONGODB_URL': ''
+};
+
+export default settings;

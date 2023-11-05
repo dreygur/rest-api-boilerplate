@@ -22,12 +22,11 @@ import NewMailer from './controllers/email';
 import * as operations from './controllers/operations';
 
 // Settings
-import settings from '../settings.json';
+import settings from './settings';
 
 // Controllers
 import { imageUp } from './controllers/imageUp';
 import gracefullShutdown from './controllers/gracefullShutdown';
-import { driverCache } from './controllers/driverCache';
 
 export default class App {
   constructor({ deps } = {}) {
@@ -40,13 +39,17 @@ export default class App {
     this.db = operations;
     this.events = {};
     this.wsMiddlewares = [];
+    this.depPromises = [];
 
     if (deps) {
-      let promises = deps.map(({ method, args }) => new Promise((resolve, reject) => method(...args).then(r => resolve(r)).catch((err) => reject(err))));
-      Promise.all(promises).then((res) => console.log(`=> ${res}!`)).then(() => this.init()).catch((err) => console.log(err));
+      this.depPromises = deps.map(({ method, args }) => new Promise((resolve, reject) => method(...args).then(r => resolve(r)).catch((err) => reject(err))));
     }
+    Promise.all(this.depPromises).then(res => res && res.length > 0 && console.log(`=> '${res}'!`)).then(() => this.init()).catch((err) => console.log(err));
   }
 
+  /**
+   * Boots the actual express application
+   */
   start() {
     const readyStatus = setInterval(() => {
       if (this.ready) {
@@ -56,11 +59,12 @@ export default class App {
     }, 300);
   }
 
+  /**
+   * Initialize Express app with dependencies
+   * and then the http(s) server
+   */
   init() {
-    driverCache.born();
     const { parse } = form;
-
-    this.express.enable('trust proxy');
 
     // Rate Limiter
     const limiter = rateLimit({
@@ -120,6 +124,9 @@ export default class App {
     gracefullShutdown.call({ ...this });
   }
 
+  /**
+   * Listener for http requests
+   */
   listen() {
     // Serve Front-end
     this.express.get('*', (req, res) => {
@@ -132,12 +139,18 @@ export default class App {
     });
   }
 
-  // Register Hooks
+  /**
+   * Register Hooks
+   * @param {function} callback function of hook
+   */
   hook(callback) {
     callback.call({ ...this });
   }
 
-  // configure service with api
+  /**
+   * Configure service with api
+   * @param {function} callback function for services
+   */
   configure(callback) {
     callback.call({
       ...this.express,
@@ -151,7 +164,12 @@ export default class App {
     });
   }
 
-  // register events for ws with service
+  /**
+   * Register events for ws with service
+   * @param {*} event
+   * @param {*} middlewares
+   * @param {*} callback
+   */
   register(event, middlewares, callback) {
     let callee;
     if (typeof middlewares === 'function') {

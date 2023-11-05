@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import * as operations from '../controllers/operations';
 import User from '../services/user/user.schema';
-import settings from '../../settings.json';
+import settings from '../settings';
 
 /**
  * This function is used for decoding auth token.
