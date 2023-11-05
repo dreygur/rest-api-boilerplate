@@ -3,7 +3,7 @@ const settings = {
   'origin': [
     '*'
   ],
-  'useHTTP2': true,
+  'useHTTP2': false,
   'SMTP_HOST': '',
   'SMTP_PORT': '',
   'SMTP_USER': '',
